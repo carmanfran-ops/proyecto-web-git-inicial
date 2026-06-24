@@ -1,13 +1,310 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<title>Mi Web modificada </title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VILAHEXDOSS CRM</title>
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon logo-box">
+        <img src="LOGO.jpg" alt="VILAHEXDOSS" onerror="this.style.display='none'; this.parentElement.textContent='VH';" />
+      </div>
+      <div>
+        <h1>VILAHEXDOSS CRM</h1>
+        <p>Gestión Comercial · Incidencias · Seguimiento</p>
+      </div>
+    </div>
 
-<h1>Bienvenido a mi web</h1>
-<p>Primera página con Git</p>
+    <button class="new-call-btn" onclick="showSection('nueva-llamada')">➕ NUEVA INCIDENCIA</button>
 
+    <nav class="menu">
+      <button class="nav-btn active" data-section="dashboard">📊 Panel de Control</button>
+      <button class="nav-btn" data-section="nueva-llamada">☎️ Nueva Incidencia</button>
+      <button class="nav-btn" data-section="llamadas">📝 Incidencias</button>
+      <button class="nav-btn" data-section="seguimiento">📍 Seguimiento</button>
+      <button class="nav-btn" data-section="presupuestos">💶 Presupuestos</button>
+      <button class="nav-btn" data-section="agenda">🗓️ Mi Agenda</button>
+      <button class="nav-btn" data-section="clientes">🏢 Clientes</button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="secondary-btn" onclick="generarReporteSemanal()">📋 Reporte semanal</button>
+      <button id="btnExportar" class="secondary-btn">💾 Copia de seguridad</button>
+      <button id="btnImportarBackup" class="secondary-btn">📂 Importar copia</button>
+      <input id="backupInput" class="hidden" type="file" accept=".json,application/json" />
+      <small class="version">v1.0 · VILAHEXDOSS</small>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h2 id="pageTitle">Panel de Control</h2>
+        <p id="pageSubtitle">Lo pendiente de hoy de un vistazo</p>
+      </div>
+      <div class="today" id="today"></div>
+    </header>
+
+    <section id="dashboard" class="section active">
+      <div class="cards">
+        <article class="card blue"><span>Incidencias hoy</span><strong id="countHoy">0</strong></article>
+        <article class="card red"><span>Pendientes avisar</span><strong id="countAvisar">0</strong></article>
+        <article class="card yellow"><span>Seguimientos hoy</span><strong id="countSegHoy">0</strong></article>
+        <article class="card green"><span>Presupuestos pendientes</span><strong id="countPrePend">0</strong></article>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>🔥 Hoy debo hacer</h3>
+            <button class="primary-btn small" onclick="showSection('seguimiento')">Ver todo</button>
+          </div>
+          <div id="listaHoy" class="task-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Últimas incidencias</h3>
+            <button class="primary-btn small" onclick="showSection('nueva-llamada')">+ Nueva</button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Hora</th><th>Cliente</th><th>Qué sucede</th><th>Estado</th></tr>
+              </thead>
+              <tbody id="dashboardLlamadas"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="nueva-llamada" class="section">
+      <div class="panel main-form">
+        <h3>☎️ Nueva incidencia</h3>
+
+        <form id="formLlamada" class="form-grid">
+          <label>Fecha <input id="llFecha" type="date" required /></label>
+          <label>Hora <input id="llHora" type="time" required /></label>
+
+          <div class="section-title contacto">👤 Datos de contacto</div>
+
+          <label class="full">Buscar cliente
+            <input id="clienteBusqueda" list="clientesDatalist" placeholder="Escribe cliente, código o teléfono..." autocomplete="off" />
+            <datalist id="clientesDatalist"></datalist>
+          </label>
+
+          <input type="hidden" id="llClienteId" />
+
+          <div id="clienteEncontrado" class="client-result full muted-box">
+            Busca un cliente. Si no existe, escribe el nombre manualmente.
+          </div>
+
+          <label>Cliente manual / nuevo <input id="llClienteManual" placeholder="Solo si no está en la lista" /></label>
+          <label>Persona que llama <input id="llPersona" placeholder="Nombre de la persona" /></label>
+          <label>Teléfono contacto <input id="llTelefono" placeholder="Teléfono" /></label>
+          <label>Email contacto <input id="llEmail" type="email" placeholder="Email opcional" /></label>
+
+          <div class="section-title incidencia">🚨 Incidencia</div>
+
+          <label>Tipo
+            <select id="llTipo">
+              <option>Avería</option>
+              <option>Mantenimiento</option>
+              <option>Presupuesto</option>
+              <option>Consulta</option>
+              <option>Incidencia</option>
+              <option>Reclamación</option>
+              <option>Visita</option>
+              <option>Otros</option>
+            </select>
+          </label>
+
+          <label>Urgencia
+            <select id="llUrgencia">
+              <option>Baja</option>
+              <option selected>Normal</option>
+              <option>Alta</option>
+              <option>Urgente</option>
+            </select>
+          </label>
+
+          <label>Avisar a <input id="llAvisarA" placeholder="Técnico, oficina, proveedor..." /></label>
+
+          <label>Estado
+            <select id="llEstado">
+              <option selected>Llamada recibida</option>
+              <option>Pendiente avisar</option>
+              <option>Avisado</option>
+              <option>Pendiente respuesta</option>
+              <option>Seguimiento pendiente</option>
+              <option>Pendiente presupuesto</option>
+              <option>Presupuesto enviado</option>
+              <option>Aceptado</option>
+              <option>Rechazado</option>
+              <option>Resuelto</option>
+              <option>Cerrado</option>
+            </select>
+          </label>
+
+          <label class="full">Qué sucede
+            <textarea id="llQueSucede" rows="5" placeholder="Describe claramente qué cuenta el cliente..." required></textarea>
+          </label>
+
+          <div class="section-title seguimiento">📅 Seguimiento</div>
+
+          <label>Próxima acción <input id="llProximaAccion" placeholder="Llamar, comprobar visita, enviar presupuesto..." /></label>
+          <label>Fecha seguimiento <input id="llFechaSeguimiento" type="date" /></label>
+
+          <div class="section-title presupuesto">💶 Presupuesto</div>
+
+          <label>Estado presupuesto
+            <select id="llEstadoPresupuesto">
+              <option>No aplica</option>
+              <option>Pendiente</option>
+              <option>Preparando</option>
+              <option>Enviado</option>
+              <option>Aceptado</option>
+              <option>Rechazado</option>
+            </select>
+          </label>
+
+          <label>Nº presupuesto <input id="llNumeroPresupuesto" placeholder="Ej. P-2025-145" /></label>
+
+          <label class="full">Notas internas <textarea id="llNotas" rows="3"></textarea></label>
+
+          <div class="form-actions full">
+            <button class="primary-btn big" type="submit">Guardar incidencia</button>
+            <button class="secondary-btn" type="reset" onclick="setDefaultCallDateTime()">Limpiar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="llamadas" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Incidencias</h3>
+          <input id="buscarLlamadas" type="search" placeholder="Buscar cliente, teléfono, texto, estado..." />
+        </div>
+
+        <div class="filters">
+          <button class="filter-btn active" data-filter="abiertas">Abiertas</button>
+          <button class="filter-btn" data-filter="todas">Todas</button>
+          <button class="filter-btn" data-filter="urgentes">Urgentes</button>
+          <button class="filter-btn" data-filter="presupuestos">Con presupuesto</button>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>Fecha</th><th>Cliente</th><th>Persona</th><th>Prioridad</th><th>Qué sucede</th><th>Avisar a</th><th>Estado</th><th>Seguimiento</th><th>Oportunidad</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaLlamadas"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="detalleLlamada" class="panel hidden"></div>
+    </section>
+
+    <section id="seguimiento" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Seguimientos pendientes</h3>
+          <input id="buscarSeguimiento" type="search" placeholder="Buscar seguimiento..." />
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Fecha</th><th>Cliente</th><th>Acción</th><th>Estado</th><th>Presupuesto</th><th>Acciones</th></tr></thead>
+            <tbody id="tablaSeguimientosPendientes"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Historial completo</h3>
+        <div id="timelineGlobal" class="timeline"></div>
+      </div>
+    </section>
+
+    <section id="presupuestos" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Presupuestos</h3>
+          <input id="buscarPresupuestos" type="search" placeholder="Buscar presupuesto..." />
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Incidencia</th><th>Cliente</th><th>Nº presupuesto</th><th>Estado</th><th>Importe</th><th>Notas</th><th>Acciones</th></tr></thead>
+            <tbody id="tablaPresupuestos"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="agenda" class="section">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h3>🗓️ Agenda Comercial</h3>
+            <p class="muted">Calendario mensual de visitas, reuniones y tareas</p>
+          </div>
+          <button class="primary-btn" onclick="crearTareaAgenda()">+ Nueva cita</button>
+        </div>
+
+        <div class="calendar-toolbar">
+          <button class="secondary-btn small" onclick="cambiarMesAgenda(-1)">◀</button>
+          <h3 id="agendaMesTitulo">MES</h3>
+          <button class="secondary-btn small" onclick="cambiarMesAgenda(1)">▶</button>
+        </div>
+
+        <div class="calendar-weekdays">
+          <div>LUN</div><div>MAR</div><div>MIÉ</div><div>JUE</div><div>VIE</div><div>SÁB</div><div>DOM</div>
+        </div>
+
+        <div id="agendaCalendario" class="calendar-grid"></div>
+      </div>
+
+      <div id="agendaDetalleDia" class="panel hidden"></div>
+    </section>
+
+    <section id="clientes" class="section">
+      <div class="panel">
+        <h3>Importar clientes desde CSV</h3>
+        <p class="muted">Exporta tu Excel como CSV e impórtalo aquí semanalmente.</p>
+
+        <div class="import-box">
+          <input id="csvClientes" type="file" accept=".csv,text/csv" />
+          <button class="primary-btn" onclick="importarClientesCSV()">Importar / actualizar clientes</button>
+        </div>
+
+        <p class="muted">Columnas aceptadas: codigo, nombre, contacto, telefono, email, direccion.</p>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Clientes importados</h3>
+          <input id="buscarClientes" type="search" placeholder="Buscar cliente..." />
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Código</th><th>Cliente</th><th>Contacto</th><th>Teléfono</th><th>Email</th><th>Dirección</th></tr></thead>
+            <tbody id="tablaClientes"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="js/app.js"></script>
 </body>
 </html>
