@@ -23,15 +23,25 @@ function safeParse(json, fallback) {
   try { return JSON.parse(json) ?? fallback; } catch { return fallback; }
 }
 function getData(key) { return safeParse(localStorage.getItem(key), []); }
-function saveData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+  if (window.VilahexDB && !window.VilahexDB.loading) {
+    window.VilahexDB.saveCollection(key, data);
+  }
+}
 function getAgenda() { return safeParse(localStorage.getItem(AGENDA_KEY), []); }
-function saveAgenda(agenda) { localStorage.setItem(AGENDA_KEY, JSON.stringify(agenda)); }
+function saveAgenda(agenda) {
+  localStorage.setItem(AGENDA_KEY, JSON.stringify(agenda));
+  if (window.VilahexDB && !window.VilahexDB.loading) {
+    window.VilahexDB.saveCollection(AGENDA_KEY, agenda);
+  }
+}
 function getNextId(collection) { return collection.length ? Math.max(...collection.map(item => Number(item.id) || 0)) + 1 : 1; }
 function todayISO() { return new Date().toISOString().slice(0, 10); }
 function isClosed(estado) { return ["Resuelto", "Cerrado", "Aceptado", "Rechazado"].includes(estado); }
 function val(id) { return (document.getElementById(id)?.value || "").trim(); }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const today = document.getElementById("today");
   if (today) {
     today.textContent = new Date().toLocaleDateString("es-ES", {
@@ -74,6 +84,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const clienteBusqueda = document.getElementById("clienteBusqueda");
   if (clienteBusqueda) clienteBusqueda.addEventListener("input", seleccionarClienteBuscado);
+
+  if (window.VilahexDB) {
+    showToast("Conectando con Supabase...");
+    const ok = await window.VilahexDB.loadAll();
+    showToast(ok ? "Datos cargados desde Supabase" : "Modo local: no se pudo conectar");
+  }
 
   renderAll();
 });
@@ -483,8 +499,13 @@ function editarOportunidad(id) {
 
 function eliminarLlamada(id) {
   if (!confirm("¿Eliminar incidencia y seguimientos?")) return;
+  const segsAEliminar = getData(STORAGE_KEYS.seguimientos).filter(s => s.llamadaId === id);
   saveData(STORAGE_KEYS.llamadas, getData(STORAGE_KEYS.llamadas).filter(l => l.id !== id));
   saveData(STORAGE_KEYS.seguimientos, getData(STORAGE_KEYS.seguimientos).filter(s => s.llamadaId !== id));
+  if (window.VilahexDB) {
+    window.VilahexDB.deleteRow(STORAGE_KEYS.llamadas, id);
+    segsAEliminar.forEach(s => window.VilahexDB.deleteRow(STORAGE_KEYS.seguimientos, s.id));
+  }
   document.getElementById("detalleLlamada")?.classList.add("hidden");
   renderAll();
   showToast("Incidencia eliminada");
@@ -892,6 +913,7 @@ function eliminarCitaAgenda(id) {
   const agenda = getAgenda();
   const cita = agenda.find(x => x.id === id);
   saveAgenda(agenda.filter(x => x.id !== id));
+  if (window.VilahexDB) window.VilahexDB.deleteRow(AGENDA_KEY, id);
   renderAgenda();
   if (cita) verDetalleDiaAgenda(cita.fecha);
 }
