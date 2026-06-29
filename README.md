@@ -31,3 +31,12 @@ Exporta tu Excel como CSV.
 Columnas aceptadas:
 
 codigo,nombre,contacto,telefono,email,direccion
+
+
+## Versión Supabase presentación
+
+Incluye conexión a Supabase con copia local de seguridad.
+
+Antes de subir a GitHub Pages, ejecuta en Supabase SQL Editor el archivo:
+
+`supabase_policies_presentacion.sql`
