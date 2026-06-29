@@ -296,3 +296,136 @@ input:focus, select:focus, textarea:focus {
   .calendar-day { min-height: auto; }
   .calendar-day.empty { display: none; }
 }
+/* ============================= */
+/* VILAHEXDOSS CRM - MÓVIL */
+/* ============================= */
+
+@media (max-width: 768px) {
+  body {
+    display: block;
+    overflow-x: hidden;
+  }
+
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    padding: 16px;
+    border-right: 0;
+    border-bottom: 4px solid var(--primary);
+  }
+
+  .brand {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .new-call-btn {
+    width: 100%;
+    margin-bottom: 14px;
+  }
+
+  .menu {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .nav-btn {
+    text-align: center;
+    font-size: 13px;
+    padding: 12px 8px;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+  }
+
+  .nav-btn.active {
+    border-left: 0;
+    border-bottom-color: var(--primary);
+  }
+
+  .main {
+    margin-left: 0;
+    width: 100%;
+    padding: 14px;
+  }
+
+  .topbar {
+    display: block;
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .topbar h2 {
+    font-size: 25px;
+  }
+
+  .today,
+  .cloud-status {
+    text-align: left;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .card {
+    padding: 15px;
+  }
+
+  .card strong {
+    font-size: 30px;
+  }
+
+  .grid-2,
+  .form-grid,
+  #formLlamada {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .panel-header {
+    display: grid;
+    gap: 10px;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 850px;
+    font-size: 13px;
+  }
+
+  #formLlamada label,
+  #formLlamada .muted-box {
+    padding: 14px;
+  }
+
+  #formLlamada input,
+  #formLlamada select,
+  #formLlamada textarea {
+    font-size: 15px;
+    padding: 13px;
+  }
+
+  .calendar-weekdays {
+    display: none;
+  }
+
+  .calendar-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-day {
+    min-height: auto;
+  }
+
+  .calendar-day.empty {
+    display: none;
+  }
+}
